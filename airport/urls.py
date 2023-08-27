@@ -3,11 +3,13 @@ from rest_framework import routers
 
 
 from airport.views import (
-    AirportViewSet
+    AirportViewSet,
+    RouteViewSet,
 )
 
 router = routers.DefaultRouter()
 router.register("airports", AirportViewSet)
+router.register("routers", RouteViewSet)
 
 urlpatterns = [
     path("", include(router.urls))
