@@ -4,6 +4,7 @@ from airport.models import (
     Airport,
     Route,
     Crew,
+    AirplaneType,
 )
 
 
@@ -62,3 +63,9 @@ class CrewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("A crew member with the same first name and last name already exists.")
 
         return data
+
+
+class AirplaneTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AirplaneType
+        fields = ("id", "name")
