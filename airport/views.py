@@ -1,14 +1,15 @@
 from django.shortcuts import render
 from rest_framework import mixins
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
-from airport.models import Airport, Route
+from airport.models import Airport, Route, Crew
 from airport.serializers import (
     AirportSerializer,
     RouteSerializer,
     RouteListSerializer,
-    RouteDetailSerializer
+    RouteDetailSerializer,
+    CrewSerializer,
 )
 
 
@@ -59,3 +60,8 @@ class RouteViewSet(
             return RouteDetailSerializer
 
         return RouteSerializer
+
+
+class CrewViewSet(ModelViewSet):
+    queryset = Crew.objects.all()
+    serializer_class = CrewSerializer
