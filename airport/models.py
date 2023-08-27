@@ -47,6 +47,13 @@ class Crew(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["first_name", "last_name"], name="unique_crew"
+            )
+        ]
+
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=255, unique=True)
