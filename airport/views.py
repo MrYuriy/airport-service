@@ -3,7 +3,7 @@ from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
-from airport.models import Airport, Route, Crew, AirplaneType
+from airport.models import Airport, Route, Crew, AirplaneType, Airplane
 from airport.serializers import (
     AirportSerializer,
     RouteSerializer,
@@ -11,6 +11,9 @@ from airport.serializers import (
     RouteDetailSerializer,
     CrewSerializer,
     AirplaneTypeSerializer,
+    AirplaneSerializer,
+    AirplaneListSerializer,
+    AirplaneDetailSerializer
 )
 
 
@@ -49,7 +52,7 @@ class RouteViewSet(
             queryset = queryset.filter(source__name__icontains=source)
 
         if destination:
-            queryset = queryset.filter(genres__name__icontains=destination)
+            queryset = queryset.filter(destination__name__icontains=destination)
 
         return queryset.distinct()
 
@@ -73,3 +76,35 @@ class AirplaneTypeViewSet(ModelViewSet):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
+
+class AirplaneViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
+    queryset = Airplane.objects.all().prefetch_related("air_plane_type")
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
+    def get_queryset(self):
+        """Retrieve the movies with filters"""
+        name = self.request.query_params.get("name")
+        air_plane_type = self.request.query_params.get("air_plane_type")
+
+        queryset = self.queryset
+
+        if name:
+            queryset = queryset.filter(name=name)
+
+        if air_plane_type:
+            queryset = queryset.filter(air_plane_type__name__icontains=air_plane_type)
+
+        return queryset.distinct()
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return AirplaneListSerializer
+        if self.action == "retrieve":
+            return AirplaneDetailSerializer
+        return AirplaneSerializer
