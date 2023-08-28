@@ -68,6 +68,10 @@ class Airplane(models.Model):
     seats_in_row = models.IntegerField()
     air_plane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE)
 
+    @property
+    def capacity(self) -> int:
+        return self.rows * self.seats_in_row
+
     def __str__(self):
         return self.name
 
