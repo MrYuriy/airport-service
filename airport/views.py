@@ -1,9 +1,11 @@
+from django.db.models import F, Count
 from django.shortcuts import render
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from datetime import datetime
 
 from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
-from airport.models import Airport, Route, Crew, AirplaneType, Airplane
+from airport.models import Airport, Route, Crew, AirplaneType, Airplane, Flight
 from airport.serializers import (
     AirportSerializer,
     RouteSerializer,
@@ -13,7 +15,10 @@ from airport.serializers import (
     AirplaneTypeSerializer,
     AirplaneSerializer,
     AirplaneListSerializer,
-    AirplaneDetailSerializer
+    AirplaneDetailSerializer,
+    FlightSerializer,
+    FlightListSerializer,
+    FlightDetailSerializer,
 )
 
 
@@ -108,3 +113,41 @@ class AirplaneViewSet(
         if self.action == "retrieve":
             return AirplaneDetailSerializer
         return AirplaneSerializer
+
+
+class FlightViewSet(ModelViewSet):
+    queryset = Flight.objects.all().select_related("route", "airplane").annotate(
+        tickets_available=(
+                F("airplane__rows") * F("airplane__seats_in_row")
+                - Count("tickets")
+        )
+    )
+    serializer_class = FlightSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
+    def get_queryset(self):
+        date = self.request.query_params.get("date")
+        airplane_str = self.request.query_params.get("movie")
+        source = self.request.query_params.get("source")
+        destination = self.request.query_params.get("destination")
+        queryset = self.queryset
+
+        if date:
+            date = datetime.strptime(date, "%Y-%m-%d").date()
+            queryset = queryset.filter(departure_time__date=date)
+        if airplane_str:
+            queryset = queryset.filter(airplane__name__icontains=airplane_str)
+        if source:
+            queryset = queryset.filter(route__source__name__icontains=source)
+        if destination:
+            queryset = queryset.filter(route__destination__name__icontains=destination)
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return FlightListSerializer
+
+        if self.action == "retrieve":
+            return FlightDetailSerializer
+
+        return FlightSerializer

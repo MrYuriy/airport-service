@@ -6,6 +6,7 @@ from airport.models import (
     Crew,
     AirplaneType,
     Airplane,
+    Flight,
 )
 
 
@@ -96,3 +97,37 @@ class AirplaneDetailSerializer(AirplaneSerializer):
     class Meta:
         model = Airplane
         fields = ("id", "name", "rows", "seats_in_row", "air_plane_type", "capacity")
+
+
+class FlightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flight
+        fields = ("id", "route", "airplane", "departure_time", "arrival_time")
+
+
+class FlightListSerializer(FlightSerializer):
+    airplane_capacity = serializers.IntegerField(source="airplane.capacity", read_only=True)
+    route = serializers.SerializerMethodField("get_route")
+
+    def get_route(self, obj):
+        return f"{obj.route.source} - {obj.route.destination}"
+
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "airplane_capacity"
+        )
+
+
+class FlightDetailSerializer(FlightSerializer):
+    route = RouteSerializer(read_only=True)
+    airplane = AirplaneSerializer(read_only=True)
+
+    class Meta:
+        model = Flight
+        fields = ("id", "route", "airplane", "departure_time", "arrival_time")
