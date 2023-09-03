@@ -1,12 +1,11 @@
-from django.db.models import F, Count
-from django.shortcuts import render
-from rest_framework import mixins
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from datetime import datetime
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
-from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
+from django.db.models import F, Count
+from rest_framework import mixins
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
+
 from airport.models import (
     Airport,
     Route,
@@ -14,9 +13,9 @@ from airport.models import (
     AirplaneType,
     Airplane,
     Flight,
-    Ticket,
     Order,
 )
+from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
 from airport.serializers import (
     AirportSerializer,
     RouteSerializer,
@@ -30,9 +29,6 @@ from airport.serializers import (
     FlightSerializer,
     FlightListSerializer,
     FlightDetailSerializer,
-    TicketSerializer,
-    TicketListSerializer,
-    TicketSeatsSerializer,
     OrderSerializer,
     OrderListSerializer,
 )
@@ -133,7 +129,7 @@ class FlightViewSet(ModelViewSet):
         .select_related("route", "airplane")
         .annotate(
             tickets_available=(
-                F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
+                    F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
             )
         )
     )
