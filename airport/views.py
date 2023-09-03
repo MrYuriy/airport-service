@@ -7,7 +7,16 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
-from airport.models import Airport, Route, Crew, AirplaneType, Airplane, Flight, Ticket, Order
+from airport.models import (
+    Airport,
+    Route,
+    Crew,
+    AirplaneType,
+    Airplane,
+    Flight,
+    Ticket,
+    Order,
+)
 from airport.serializers import (
     AirportSerializer,
     RouteSerializer,
@@ -25,15 +34,11 @@ from airport.serializers import (
     TicketListSerializer,
     TicketSeatsSerializer,
     OrderSerializer,
-    OrderListSerializer
+    OrderListSerializer,
 )
 
 
-class AirportViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet
-):
+class AirportViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
@@ -123,10 +128,13 @@ class AirplaneViewSet(
 
 
 class FlightViewSet(ModelViewSet):
-    queryset = Flight.objects.all().select_related("route", "airplane").annotate(
-        tickets_available=(
-                F("airplane__rows") * F("airplane__seats_in_row")
-                - Count("tickets")
+    queryset = (
+        Flight.objects.all()
+        .select_related("route", "airplane")
+        .annotate(
+            tickets_available=(
+                F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
+            )
         )
     )
     serializer_class = FlightSerializer
@@ -134,7 +142,7 @@ class FlightViewSet(ModelViewSet):
 
     def get_queryset(self):
         date = self.request.query_params.get("date")
-        airplane_str = self.request.query_params.get("movie")
+        airplane_str = self.request.query_params.get("airplane")
         source = self.request.query_params.get("source")
         destination = self.request.query_params.get("destination")
         queryset = self.queryset
@@ -171,7 +179,7 @@ class OrderViewSet(
     GenericViewSet,
 ):
     queryset = Order.objects.prefetch_related(
-        "tickets__movie_session__movie", "tickets__movie_session__cinema_hall"
+        "tickets__flight__airplane", "tickets__flight__airplane"
     )
     serializer_class = OrderSerializer
     pagination_class = OrderPagination

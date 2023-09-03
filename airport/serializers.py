@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import transaction
 
 from airport.models import (
     Airport,
@@ -8,7 +9,7 @@ from airport.models import (
     Airplane,
     Flight,
     Ticket,
-    Order
+    Order,
 )
 
 
@@ -25,12 +26,8 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteListSerializer(RouteSerializer):
-    source = serializers.SlugRelatedField(
-        read_only=True, slug_field="name"
-    )
-    destination = serializers.SlugRelatedField(
-        read_only=True, slug_field="name"
-    )
+    source = serializers.SlugRelatedField(read_only=True, slug_field="name")
+    destination = serializers.SlugRelatedField(read_only=True, slug_field="name")
 
     class Meta:
         model = Route
@@ -38,12 +35,8 @@ class RouteListSerializer(RouteSerializer):
 
 
 class RouteDetailSerializer(RouteSerializer):
-    source = AirportSerializer(
-        read_only=True
-    )
-    destination = AirportSerializer(
-        read_only=True
-    )
+    source = AirportSerializer(read_only=True)
+    destination = AirportSerializer(read_only=True)
 
     class Meta:
         model = Route
@@ -59,12 +52,16 @@ class CrewSerializer(serializers.ModelSerializer):
         """
         Check if a crew with the same first_name and last_name already exists.
         """
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
+        first_name = data.get("first_name")
+        last_name = data.get("last_name")
 
-        existing_crew = Crew.objects.filter(first_name=first_name, last_name=last_name).first()
+        existing_crew = Crew.objects.filter(
+            first_name=first_name, last_name=last_name
+        ).first()
         if existing_crew:
-            raise serializers.ValidationError("A crew member with the same first name and last name already exists.")
+            raise serializers.ValidationError(
+                "A crew member with the same first name and last name already exists."
+            )
 
         return data
 
@@ -82,9 +79,7 @@ class AirplaneSerializer(serializers.ModelSerializer):
 
 
 class AirplaneListSerializer(AirplaneSerializer):
-    air_plane_type = serializers.SlugRelatedField(
-        read_only=True, slug_field="name"
-    )
+    air_plane_type = serializers.SlugRelatedField(read_only=True, slug_field="name")
 
     class Meta:
         model = Airplane
@@ -92,9 +87,7 @@ class AirplaneListSerializer(AirplaneSerializer):
 
 
 class AirplaneDetailSerializer(AirplaneSerializer):
-    air_plane_type = AirplaneTypeSerializer(
-        read_only=True
-    )
+    air_plane_type = AirplaneTypeSerializer(read_only=True)
 
     class Meta:
         model = Airplane
@@ -108,7 +101,9 @@ class FlightSerializer(serializers.ModelSerializer):
 
 
 class FlightListSerializer(FlightSerializer):
-    airplane_capacity = serializers.IntegerField(source="airplane.capacity", read_only=True)
+    airplane_capacity = serializers.IntegerField(
+        source="airplane.capacity", read_only=True
+    )
     route = serializers.SerializerMethodField("get_route")
 
     def get_route(self, obj):
@@ -122,7 +117,7 @@ class FlightListSerializer(FlightSerializer):
             "airplane",
             "departure_time",
             "arrival_time",
-            "airplane_capacity"
+            "airplane_capacity",
         )
 
 
@@ -138,9 +133,7 @@ class FlightDetailSerializer(FlightSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs=attrs)
-        Ticket.validate_ticket(
-            attrs["row"], attrs["seat"], data["flight"].cinema_hall, ValidationError
-        )
+        Ticket.validate_ticket(attrs["row"], attrs["seat"], data["flight"].airplane)
         return data
 
     class Meta:
@@ -149,7 +142,7 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class TicketListSerializer(TicketSerializer):
-    movie_session = FlightListSerializer(many=False, read_only=True)
+    flight = FlightListSerializer(many=False, read_only=True)
 
 
 class TicketSeatsSerializer(TicketSerializer):
@@ -176,4 +169,3 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderListSerializer(OrderSerializer):
     tickets = TicketListSerializer(many=True, read_only=True)
-

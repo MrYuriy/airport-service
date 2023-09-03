@@ -100,10 +100,22 @@ class Flight(models.Model):
         )
 
 
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.created_at)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
 class Ticket(models.Model):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name="tickets")
     row = models.IntegerField()
     seat = models.IntegerField()
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
 
     @staticmethod
     def validate_ticket(row, seat, airplane):
@@ -125,14 +137,3 @@ class Ticket(models.Model):
     class Meta:
         unique_together = ("flight", "row", "seat")
         ordering = ["row", "seat"]
-
-
-class Order(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.created_at)
-
-    class Meta:
-        ordering = ["-created_at"]

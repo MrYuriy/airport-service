@@ -25,7 +25,7 @@ class UserRegisterationSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        return CustomUser.objects.create_user(**validated_data)
+        return User.objects.create_user(**validated_data)
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -41,3 +41,7 @@ class UserLoginSerializer(serializers.Serializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError("Incorrect Credentials")
+
+
+class UserLogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()

@@ -12,43 +12,43 @@ from .models import (
 
 
 class AirportModelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'closest_big_city')
-    list_filter = ('closest_big_city',)
-    search_fields = ('name', 'closest_big_city')
+    list_display = ("name", "closest_big_city")
+    list_filter = ("closest_big_city",)
+    search_fields = ("name", "closest_big_city")
 
 
 class RouteModelAdmin(admin.ModelAdmin):
-    list_display = ('source', 'destination', 'distance')
+    list_display = ("source", "destination", "distance")
 
 
 class CrewAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name')
+    list_display = ("first_name", "last_name")
 
 
 class AirplaneTypeAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ("name",)
 
 
 class AirplaneAdmin(admin.ModelAdmin):
-    list_display = ('name', 'rows', 'seats_in_row', 'air_plane_type')
+    list_display = ("name", "rows", "seats_in_row", "air_plane_type")
 
 
 class FlightAdmin(admin.ModelAdmin):
-    list_display = ('route', 'airplane', 'departure_time', 'arrival_time', 'duration')
-    list_filter = ('route', 'airplane')
-    date_hierarchy = 'departure_time'
+    list_display = ("route", "airplane", "departure_time", "arrival_time", "duration")
+    list_filter = ("route", "airplane")
+    date_hierarchy = "departure_time"
 
 
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('flight', 'row', 'seat')
-    list_filter = ('flight',)
-    search_fields = ('flight__route__source__name', 'flight__route__destination__name')
+    list_display = ("flight", "row", "seat")
+    list_filter = ("flight",)
+    search_fields = ("flight__route__source__name", "flight__route__destination__name")
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'user')
-    list_filter = ('user',)
-    date_hierarchy = 'created_at'
+    list_display = ("created_at", "user")
+    list_filter = ("user",)
+    date_hierarchy = "created_at"
 
 
 admin.site.register(Airport, AirportModelAdmin)

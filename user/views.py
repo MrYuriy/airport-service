@@ -54,6 +54,7 @@ class UserLogoutAPIView(GenericAPIView):
     An endpoint to logout users.
     """
 
+    serializer_class = serializers.UserLogoutSerializer
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
