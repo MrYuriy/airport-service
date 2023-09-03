@@ -3,6 +3,23 @@
 This project is a Django application for managing aviation data, including airports, routes, crews, airplane types,
 airplanes, flights, orders, and tickets.
 
+## Installation via GitHub
+
+To install the Cinema API, you need to follow the below steps:
+
+1. Install PostgresSQL and create a database
+2. Clone the repository using `git clone https://github.com/MrYuriy/airport-service.git`
+3. Navigate to the repository directory using `cd airport-service`
+4. Create a virtual environment using `python -m venv venv`
+5. Activate the virtual environment on Linux/macOS using `source venv/bin/activate` or on Windows using `venv\Scripts\activate`
+6. Install the required dependencies using `pip install -r requirements.txt`
+7. Set environment variables like in .env_sample. Create .env file in your project's directory: 
+   ```SQL
+   echo. >.env
+   ```
+8. Apply migrations to the database using `python manage.py migrate`
+9. Start the server using `python manage.py runserver`
+
 ## Project Structure
 
 The project consists of several files organized as follows:
